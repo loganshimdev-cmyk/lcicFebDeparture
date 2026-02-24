@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LCIC Departure Schedule</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#06080f;
+  --surface:#0d1117;
+  --card:#161b22;
+  --card-hover:#1c2333;
+  --border:#21262d;
+  --accent:#58a6ff;
+  --accent-glow:#58a6ff33;
+  --amber:#f0b429;
+  --amber-dim:#f0b42933;
+  --green:#3fb950;
+  --red:#f85149;
+  --pink:#f778ba;
+  --text:#e6edf3;
+  --text-dim:#8b949e;
+  --text-muted:#484f58;
+  --radius:12px;
+  --radius-sm:8px;
+  --radius-xs:6px;
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Sans KR','Plus Jakarta Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── Animated BG ── */
+.bg-glow{
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 600px 400px at 20% 10%, #58a6ff08, transparent),
+    radial-gradient(ellipse 500px 500px at 80% 80%, #f0b42906, transparent);
+}
+
+/* ── Header ── */
+.header{
+  position:sticky;top:0;z-index:100;
+  background:var(--bg);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+}
+.header-inner{
+  max-width:1100px;margin:0 auto;
+  padding:16px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;flex-wrap:wrap;
+}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-icon{
+  width:36px;height:36px;border-radius:8px;
+  background:linear-gradient(135deg,var(--accent),#1f6feb);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;font-weight:800;color:#fff;
+  font-family:'Space Mono',monospace;
+  letter-spacing:-1px;
+}
+.logo-text{font-size:15px;font-weight:700;letter-spacing:-0.3px;}
+.logo-sub{font-size:11px;color:var(--text-dim);font-weight:400;letter-spacing:0.5px;}
+.header-badge{
+  font-family:'Space Mono',monospace;
+  font-size:11px;color:var(--amber);
+  background:var(--amber-dim);
+  padding:4px 10px;border-radius:20px;
+  letter-spacing:0.5px;font-weight:700;
+  white-space:nowrap;
+}
+
+/* ── Notice Banner ── */
+.notice-bar{
+  background:linear-gradient(135deg,#1a1207,#15120a);
+  border-bottom:1px solid #f0b42925;
+  overflow:hidden;
+}
+.notice-inner{
+  max-width:1100px;margin:0 auto;padding:16px 20px;
+}
+.notice-title{
+  font-size:13px;font-weight:700;color:var(--amber);
+  margin-bottom:10px;display:flex;align-items:center;gap:6px;
+  letter-spacing:0.3px;
+}
+.notice-grid{
+  display:grid;grid-template-columns:1fr;gap:8px;
+}
+@media(min-width:640px){.notice-grid{grid-template-columns:1fr 1fr;}}
+.notice-item{
+  display:flex;align-items:flex-start;gap:8px;
+  font-size:13px;line-height:1.5;color:#e6edf3cc;
+}
+.notice-icon{
+  flex-shrink:0;width:20px;height:20px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;margin-top:1px;
+}
+.notice-icon.warn{background:#f8514920;color:var(--red);}
+.notice-icon.info{background:#58a6ff20;color:var(--accent);}
+.notice-item strong{color:#e6edf3;font-weight:600;}
+
+/* ── Main ── */
+.main{
+  max-width:1100px;margin:0 auto;
+  padding:20px;position:relative;z-index:1;
+}
+
+/* ── Stats Bar ── */
+.stats-bar{
+  display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;
+}
+.stat-chip{
+  font-size:12px;padding:6px 12px;border-radius:20px;
+  background:var(--card);border:1px solid var(--border);
+  color:var(--text-dim);font-weight:500;
+  display:flex;align-items:center;gap:5px;
+}
+.stat-chip .num{color:var(--text);font-weight:700;font-family:'Space Mono',monospace;}
+
+/* ── Search ── */
+.search-wrap{
+  position:relative;margin-bottom:20px;
+}
+.search-input{
+  width:100%;padding:12px 16px 12px 40px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);color:var(--text);
+  font-size:14px;font-family:inherit;
+  transition:all .2s;outline:none;
+}
+.search-input::placeholder{color:var(--text-muted);}
+.search-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);}
+.search-icon{
+  position:absolute;left:14px;top:50%;transform:translateY(-50%);
+  color:var(--text-muted);font-size:14px;pointer-events:none;
+}
+
+/* ── Date Tabs ── */
+.date-tabs{
+  display:flex;gap:6px;margin-bottom:20px;
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;padding-bottom:4px;
+}
+.date-tabs::-webkit-scrollbar{display:none;}
+.date-tab{
+  flex-shrink:0;padding:8px 16px;border-radius:var(--radius-sm);
+  background:var(--card);border:1px solid var(--border);
+  color:var(--text-dim);font-size:13px;font-weight:600;
+  cursor:pointer;transition:all .2s;white-space:nowrap;
+  display:flex;align-items:center;gap:6px;
+}
+.date-tab:hover{background:var(--card-hover);color:var(--text);}
+.date-tab.active{
+  background:var(--accent);color:#fff;border-color:var(--accent);
+}
+.date-tab .tab-count{
+  font-family:'Space Mono',monospace;font-size:11px;
+  background:#ffffff20;padding:1px 6px;border-radius:10px;
+}
+.date-tab.active .tab-count{background:#ffffff30;}
+
+/* ── Pickup Group ── */
+.date-section{display:none;}
+.date-section.active{display:block;}
+
+.pickup-group{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  margin-bottom:12px;
+  overflow:hidden;
+  transition:all .2s;
+}
+.pickup-group:hover{border-color:#30363d;}
+
+.pickup-header{
+  padding:14px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;gap:12px;
+  transition:background .2s;
+  user-select:none;
+}
+.pickup-header:hover{background:var(--card-hover);}
+
+.pickup-left{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.pickup-time{
+  font-family:'Space Mono',monospace;
+  font-size:20px;font-weight:700;color:var(--amber);
+  letter-spacing:-0.5px;
+  line-height:1;
+}
+.pickup-meta{display:flex;flex-direction:column;gap:1px;}
+.pickup-label{font-size:11px;color:var(--text-muted);font-weight:500;letter-spacing:0.5px;text-transform:uppercase;}
+.pickup-date-note{font-size:12px;color:var(--text-dim);font-weight:500;}
+.pickup-right{display:flex;align-items:center;gap:8px;}
+.pickup-count{
+  font-family:'Space Mono',monospace;
+  font-size:12px;color:var(--accent);
+  background:var(--accent-glow);
+  padding:4px 10px;border-radius:20px;font-weight:700;
+}
+.pickup-arrow{
+  color:var(--text-muted);transition:transform .3s;font-size:12px;
+}
+.pickup-group.open .pickup-arrow{transform:rotate(180deg);}
+
+/* ── Student List ── */
+.student-list{
+  max-height:0;overflow:hidden;
+  transition:max-height .4s cubic-bezier(0.4,0,0.2,1);
+}
+.pickup-group.open .student-list{max-height:3000px;}
+
+.student-list-inner{
+  padding:0 16px 14px;
+}
+.flight-group-label{
+  font-size:11px;color:var(--text-muted);font-weight:600;
+  letter-spacing:0.5px;text-transform:uppercase;
+  padding:10px 0 6px;
+  border-top:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;
+}
+.flight-group-label:first-child{border-top:none;padding-top:4px;}
+.flight-badge{
+  font-family:'Space Mono',monospace;
+  font-size:11px;font-weight:700;
+  padding:2px 8px;border-radius:4px;
+  background:#1f6feb25;color:var(--accent);
+  letter-spacing:0.3px;
+}
+.dep-time-badge{
+  font-family:'Space Mono',monospace;
+  font-size:11px;font-weight:700;
+  color:var(--amber);
+}
+.terminal-badge{
+  font-size:10px;font-weight:700;
+  padding:1px 5px;border-radius:3px;
+  background:#3fb95020;color:var(--green);
+}
+.terminal-badge.t1{background:#f7814120;color:#f78141;}
+
+.student-row{
+  display:flex;align-items:center;
+  padding:7px 0;gap:10px;
+  border-bottom:1px solid #ffffff06;
+  font-size:13px;
+}
+.student-row:last-child{border-bottom:none;}
+.student-num{
+  font-family:'Space Mono',monospace;
+  font-size:11px;color:var(--text-muted);
+  min-width:20px;text-align:right;
+}
+.student-name{
+  font-weight:600;color:var(--text);
+  min-width:55px;
+}
+.student-eng{
+  font-size:11px;color:var(--text-dim);
+  font-family:'Plus Jakarta Sans','Noto Sans KR',sans-serif;
+  font-weight:500;letter-spacing:0.2px;
+}
+.gender-dot{
+  width:6px;height:6px;border-radius:50%;flex-shrink:0;
+}
+.gender-dot.m{background:var(--accent);}
+.gender-dot.f{background:var(--pink);}
+
+/* ── No results ── */
+.no-results{
+  text-align:center;padding:60px 20px;
+  color:var(--text-muted);font-size:14px;
+}
+.no-results-icon{font-size:32px;margin-bottom:8px;}
+
+/* ── Footer ── */
+.footer{
+  max-width:1100px;margin:0 auto;
+  padding:30px 20px;text-align:center;
+  color:var(--text-muted);font-size:11px;
+  border-top:1px solid var(--border);
+  letter-spacing:0.3px;
+}
+
+/* ── Animations ── */
+@keyframes fadeInUp{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.pickup-group{animation:fadeInUp .4s ease both;}
+.pickup-group:nth-child(2){animation-delay:.05s}
+.pickup-group:nth-child(3){animation-delay:.1s}
+.pickup-group:nth-child(4){animation-delay:.15s}
+.pickup-group:nth-child(5){animation-delay:.2s}
+
+/* ── Mobile ── */
+@media(max-width:640px){
+  .header-inner{padding:12px 16px;}
+  .logo-icon{width:30px;height:30px;font-size:13px;}
+  .logo-text{font-size:14px;}
+  .notice-inner{padding:14px 16px;}
+  .main{padding:16px;}
+  .pickup-time{font-size:17px;}
+  .pickup-header{padding:12px 14px;}
+  .student-list-inner{padding:0 14px 12px;}
+  .student-eng{display:none;}
+  .search-input{font-size:16px;} /* prevent zoom on iOS */
+  .date-tab{padding:7px 12px;font-size:12px;}
+  .stat-chip{font-size:11px;padding:5px 10px;}
+}
+
+/* ── Print ── */
+@media print{
+  .header,.notice-bar,.search-wrap,.date-tabs,.stats-bar,.footer,.bg-glow{display:none!important}
+  body{background:#fff;color:#000;}
+  .main{max-width:100%;padding:0;}
+  .date-section{display:block!important;}
+  .pickup-group{border:1px solid #ccc;break-inside:avoid;margin-bottom:8px;}
+  .student-list{max-height:none!important;}
+  .pickup-header{cursor:default;}
+  .pickup-arrow{display:none;}
+  .pickup-time{color:#b45309;}
+  .flight-badge{background:#dbeafe;color:#1e40af;}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">LC</div>
+      <div>
+        <div class="logo-text">LCIC Departure Schedule</div>
+        <div class="logo-sub">공항 출발 안내</div>
+      </div>
+    </div>
+    <div class="header-badge">FEB — MAR 2026</div>
+  </div>
+</header>
+
+<!-- Notice -->
+<div class="notice-bar">
+  <div class="notice-inner">
+    <div class="notice-title">⚠ 출발 전 필수 확인사항</div>
+    <div class="notice-grid">
+      <div class="notice-item">
+        <div class="notice-icon warn">!</div>
+        <div><strong>E-Ticket 필수 저장</strong> — 이티켓을 반드시 핸드폰에 저장해 주세요. 이티켓이 없으면 공항 진입 자체가 불가합니다.</div>
+      </div>
+      <div class="notice-item">
+        <div class="notice-icon warn">!</div>
+        <div><strong>준비물 확인</strong> — 여권과 선생님께 받은 종이 서류들을 빠짐없이 잘 챙겨주세요.</div>
+      </div>
+      <div class="notice-item">
+        <div class="notice-icon info">✓</div>
+        <div><strong>체크아웃</strong> — 출발 시간 전까지 체크아웃을 완료해 주세요.</div>
+      </div>
+      <div class="notice-item">
+        <div class="notice-icon info">✓</div>
+        <div><strong>로비 집합</strong> — LCIC 픽업 시간 <strong>10분 전</strong>까지 기숙사 로비에서 대기해 주세요.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main -->
+<main class="main">
+  <!-- Stats -->
+  <div class="stats-bar" id="statsBar"></div>
+
+  <!-- Search -->
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" id="searchInput" type="text" placeholder="이름 또는 편명으로 검색..." autocomplete="off">
+  </div>
+
+  <!-- Date Tabs -->
+  <div class="date-tabs" id="dateTabs"></div>
+
+  <!-- Content -->
+  <div id="content"></div>
+</main>
+
+<footer class="footer">
+  LCIC — Lapulapu-Cebu International College · Student Departure Info
+</footer>
+
+<script>
+// ─── DATA ───
+const allData = [
+  {
+    date:'2026-02-27', label:'2월 27일 (금)', groups:[
+      { pickup:'23:15', pickupDate:'2/26 (목)', note:'전날 밤 출발',
+        students:[
+          {n:'서재현',e:'JAEHYEON SEO',g:'M',f:'LJ32',d:'02:15',t:'T2'},
+          {n:'곽유진',e:'GWAK YUJIN',g:'F',f:'RF524',d:'02:00',t:'T2'},
+        ]},
+      { pickup:'10:05', pickupDate:'2/27 (금)', note:'',
+        students:[
+          {n:'김유빈',e:'YU BIN KIM',g:'F',f:'TW122',d:'13:05',t:'T2'},
+        ]},
+    ]
+  },
+  {
+    date:'2026-02-28', label:'2월 28일 (토)', groups:[
+      { pickup:'21:15', pickupDate:'2/27 (금)', note:'전날 밤 출발',
+        students:[
+          {n:'민소윤',e:'SOYUN MIN',g:'F',f:'KE602',d:'00:15',t:'T2'},
+          {n:'정유경',e:'YUKYUNG JEONG',g:'F',f:'PR486',d:'00:25',t:'T2'},
+          {n:'김원진',e:'WONJIN KIM',g:'M',f:'PR486',d:'00:25',t:'T2'},
+          {n:'차정훈',e:'JUNG HOON CHA',g:'M',f:'7C2142',d:'00:40',t:'T2'},
+          {n:'한승헌',e:'HAN SEUNGHEON',g:'M',f:'7C2142',d:'00:40',t:'T2'},
+          {n:'김채민',e:'CHAEMIN KIM',g:'F',f:'7C2142',d:'00:40',t:'T2'},
+          {n:'권우상',e:'WOOSANG KWON',g:'M',f:'7C2142',d:'00:40',t:'T2'},
+          {n:'신지윤',e:'JIYUN SHIN',g:'F',f:'7C2142',d:'00:40',t:'T2'},
+          {n:'김윤지',e:'YUN JI KIM',g:'F',f:'5J2504',d:'00:45',t:'T1'},
+        ]},
+      { pickup:'22:20', pickupDate:'2/27 (금)', note:'전날 밤 출발',
+        students:[
+          {n:'조한서',e:'CHO HANSEO',g:'M',f:'7C2114',d:'01:20',t:'T2'},
+          {n:'김지현',e:'JIHYUN KIM',g:'F',f:'7C2114',d:'01:20',t:'T2'},
+          {n:'정국헌',e:'GUKHEON JEONG',g:'M',f:'7C2114',d:'01:20',t:'T2'},
+          {n:'심민하',e:'MINHA SIM',g:'F',f:'BX712',d:'01:30',t:'T2'},
+          {n:'박서영',e:'SEO YEONG PARK',g:'F',f:'BX712',d:'01:30',t:'T2'},
+          {n:'송예린',e:'YERIN SONG',g:'F',f:'BX712',d:'01:30',t:'T2'},
+          {n:'최단우',e:'DANWOO CHOI',g:'F',f:'BX712',d:'01:30',t:'T2'},
+          {n:'박하예슬',e:'HAYESUL PARK',g:'F',f:'LJ62',d:'01:45',t:'T2'},
+          {n:'김회서',e:'HOE SEO KIM',g:'M',f:'LJ62',d:'01:45',t:'T2'},
+          {n:'이예빈',e:'YE BIN LEE',g:'F',f:'OZ710',d:'01:50',t:'T2'},
+          {n:'김지호',e:'JIHO KIM',g:'M',f:'OZ710',d:'01:50',t:'T2'},
+          {n:'선예진',e:'YE JIN SUN',g:'F',f:'OZ710',d:'01:50',t:'T2'},
+          {n:'이은재',e:'EUNJAE LEE',g:'F',f:'OZ710',d:'01:50',t:'T2'},
+          {n:'서민기',e:'SEO MIN GI',g:'M',f:'OZ710',d:'01:50',t:'T2'},
+        ]},
+      { pickup:'23:00', pickupDate:'2/27 (금)', note:'전날 밤 출발',
+        students:[
+          {n:'김민서',e:'MINSEO KIM',g:'F',f:'RF524',d:'02:00',t:'T2'},
+          {n:'정도우',e:'DOWOO JUNG',g:'M',f:'7C2168',d:'02:00',t:'T2'},
+          {n:'이유근',e:'YUKEUN LEE',g:'M',f:'7C2168',d:'02:00',t:'T2'},
+          {n:'최윤호',e:'YOONHO CHOI',g:'M',f:'7C2168',d:'02:00',t:'T2'},
+          {n:'김도영',e:'DOYOUNG KIM',g:'M',f:'7C2168',d:'02:00',t:'T2'},
+          {n:'김정빈',e:'JEONG BEEN KIM',g:'M',f:'7C2168',d:'02:00',t:'T2'},
+          {n:'송경찬',e:'KYEONG CHAN SONG',g:'M',f:'7C2168',d:'02:00',t:'T2'},
+          {n:'김정표',e:'JUNG PYO KIM',g:'M',f:'LJ32',d:'02:15',t:'T2'},
+          {n:'김가원',e:'GA WON KIM',g:'F',f:'LJ32',d:'02:15',t:'T2'},
+          {n:'양희정',e:'HEE JUNG YANG',g:'F',f:'LJ32',d:'02:15',t:'T2'},
+          {n:'박주혁',e:'JU HYEOK PARK',g:'M',f:'LJ32',d:'02:15',t:'T2'},
+          {n:'권서윤',e:'SEOYUN KWON',g:'F',f:'LJ32',d:'02:15',t:'T2'},
+          {n:'이서연',e:'SEOYEON LEE',g:'F',f:'LJ32',d:'02:15',t:'T2'},
+          {n:'강현주',e:'HYUNJU KANG',g:'F',f:'CX922',d:'12:30',t:'T2'},
+        ]},
+      { pickup:'10:05', pickupDate:'2/28 (토)', note:'',
+        students:[
+          {n:'송채원',e:'CHAE WON SONG',g:'F',f:'TW122',d:'13:05',t:'T2'},
+          {n:'서예원',e:'SEO YEWON',g:'F',f:'TW122',d:'13:05',t:'T2'},
+          {n:'강윤비',e:'YUNBI KANG',g:'F',f:'TW122',d:'13:05',t:'T2'},
+          {n:'박효민',e:'HYO MIN BAK',g:'F',f:'TW122',d:'13:05',t:'T2'},
+          {n:'이희온',e:'HEE ON LEE',g:'F',f:'TW122',d:'13:05',t:'T2'},
+          {n:'김서연',e:'SEO YEON KIM',g:'F',f:'TW122',d:'13:35',t:'T2'},
+        ]},
+      { pickup:'11:00', pickupDate:'2/28 (토)', note:'',
+        students:[
+          {n:'정세연',e:'SEYEON JEONG',g:'F',f:'FY3693',d:'14:00',t:'T2'},
+        ]},
+      { pickup:'11:45', pickupDate:'2/28 (토)', note:'',
+        students:[
+          {n:'이수현',e:'SU HYUN LEE',g:'F',f:'5J130',d:'14:45',t:'T2'},
+          {n:'이은봄',e:'EUN BOM LEE',g:'F',f:'5J130',d:'14:45',t:'T2'},
+        ]},
+      { pickup:'16:35', pickupDate:'2/28 (토)', note:'',
+        students:[
+          {n:'정은서',e:'EUNSEO JUNG',g:'F',f:'CX926',d:'19:35',t:'T2'},
+        ]},
+    ]
+  },
+  {
+    date:'2026-03-01', label:'3월 1일 (일)', groups:[
+      { pickup:'21:15', pickupDate:'2/28 (토)', note:'전날 밤 출발',
+        students:[
+          {n:'장서영',e:'SEO YEONG JANG',g:'F',f:'KE602',d:'00:15',t:'T2'},
+          {n:'김채민',e:'CHAEMIN KIM',g:'F',f:'KE602',d:'00:15',t:'T2'},
+          {n:'김규리',e:'GYU RI KIM',g:'F',f:'KE602',d:'00:15',t:'T2'},
+          {n:'오선민',e:'SUNMIN OH',g:'F',f:'KE602',d:'00:15',t:'T2'},
+          {n:'최림',e:'LIM CHOI',g:'F',f:'KE602',d:'00:15',t:'T2'},
+          {n:'윤상현',e:'SANG HYEON YOON',g:'M',f:'PR486',d:'00:25',t:'T2'},
+          {n:'임선우',e:'SUNWOO LIM',g:'M',f:'PR486',d:'00:25',t:'T2'},
+          {n:'강민재',e:'MINJAE KANG',g:'M',f:'PR486',d:'00:25',t:'T2'},
+          {n:'손유민',e:'YU MIN SON',g:'F',f:'7C2142',d:'00:40',t:'T2'},
+          {n:'전승혁',e:'SEUNG HYEOK JEON',g:'M',f:'7C2142',d:'00:40',t:'T2'},
+          {n:'김준현',e:'JUNHYEON KIM',g:'M',f:'7C2142',d:'00:40',t:'T2'},
+          {n:'김희수',e:'HUISU KIM',g:'M',f:'7C2142',d:'00:40',t:'T2'},
+        ]},
+      { pickup:'22:20', pickupDate:'2/28 (토)', note:'전날 밤 출발',
+        students:[
+          {n:'김재훈',e:'JAEHOON KIM',g:'M',f:'BX712',d:'01:30',t:'T2'},
+          {n:'나규연',e:'GYU YEON NA',g:'F',f:'LJ62',d:'01:45',t:'T2'},
+          {n:'권민수',e:'MINSOO KWON',g:'M',f:'LJ62',d:'01:45',t:'T2'},
+          {n:'김윤솔',e:'YUN SOL KIM',g:'F',f:'LJ62',d:'01:45',t:'T2'},
+          {n:'임다은',e:'LIM DAEUN',g:'F',f:'LJ62',d:'01:45',t:'T2'},
+          {n:'곽정인',e:'JEONGIN GWAK',g:'F',f:'LJ62',d:'01:45',t:'T2'},
+          {n:'김건주',e:'GEONJU KIM',g:'F',f:'LJ62',d:'01:45',t:'T2'},
+          {n:'노하은',e:'HAEUN ROH',g:'F',f:'OZ710',d:'01:50',t:'T2'},
+          {n:'윤수영',e:'SU YEONG YOON',g:'F',f:'OZ710',d:'01:50',t:'T2'},
+          {n:'윤미애',e:'MIAE YUN',g:'F',f:'OZ710',d:'01:50',t:'T2'},
+          {n:'윤진주',e:'JINJU YOON',g:'F',f:'OZ710',d:'01:50',t:'T2'},
+        ]},
+      { pickup:'23:00', pickupDate:'2/28 (토)', note:'전날 밤 출발',
+        students:[
+          {n:'오상민',e:'OH SANGMIN',g:'M',f:'7C2168',d:'02:00',t:'T2'},
+          {n:'최예원',e:'YEWON CHOI',g:'F',f:'7C2168',d:'02:00',t:'T2'},
+          {n:'박민수',e:'MINSU PARK',g:'M',f:'7C2168',d:'02:00',t:'T2'},
+          {n:'김도경',e:'KIM DOKYOUNG',g:'M',f:'7C2168',d:'02:00',t:'T2'},
+          {n:'박원창',e:'WON CHANG PARK',g:'M',f:'7C2168',d:'02:00',t:'T2'},
+          {n:'박명하',e:'MYOUNGHA PARK',g:'M',f:'7C2168',d:'02:00',t:'T2'},
+          {n:'장민석',e:'CHANG MINSEOK',g:'M',f:'7C2168',d:'02:00',t:'T2'},
+          {n:'정도윤',e:'DOYUN JEONG',g:'M',f:'7C2168',d:'02:00',t:'T2'},
+          {n:'김채은',e:'CHAE EUN KIM',g:'F',f:'7C2168',d:'02:00',t:'T2'},
+          {n:'신재성',e:'JAESUNG SHIN',g:'M',f:'7C2168',d:'02:00',t:'T2'},
+          {n:'윤정평',e:'JEONGPYEONG YUN',g:'M',f:'7C2168',d:'02:00',t:'T2'},
+          {n:'박현준',e:'HYEON JUN PARK',g:'M',f:'7C2168',d:'02:00',t:'T2'},
+          {n:'김수경',e:'SU GYEONG KIM',g:'F',f:'7C2168',d:'02:00',t:'T2'},
+          {n:'박시은',e:'SIEUN PARK',g:'F',f:'7C2168',d:'02:00',t:'T2'},
+          {n:'김서영',e:'SEOYOUNG KIM',g:'F',f:'LJ32',d:'02:15',t:'T2'},
+          {n:'김혜원',e:'HYE WON KIM',g:'F',f:'LJ32',d:'02:15',t:'T2'},
+          {n:'노시윤',e:'SIYOON ROH',g:'F',f:'LJ32',d:'02:15',t:'T2'},
+        ]},
+    ]
+  },
+  {
+    date:'2026-03-02', label:'3월 2일 (월)', groups:[
+      { pickup:'21:25', pickupDate:'3/1 (일)', note:'전날 밤 출발',
+        students:[
+          {n:'안혜주',e:'AHN HYEJU',g:'F',f:'PR486',d:'00:25',t:'T2'},
+        ]},
+    ]
+  },
+];
+
+// ─── RENDER ───
+const totalStudents = allData.reduce((s,d)=>s+d.groups.reduce((s2,g)=>s2+g.students.length,0),0);
+
+// Stats
+document.getElementById('statsBar').innerHTML = `
+  <div class="stat-chip">전체 출발 인원 <span class="num">${totalStudents}명</span></div>
+  <div class="stat-chip">출발 기간 <span class="num">2/27 — 3/2</span></div>
+`;
+
+// Tabs
+const tabsEl = document.getElementById('dateTabs');
+allData.forEach((d,i)=>{
+  const cnt = d.groups.reduce((s,g)=>s+g.students.length,0);
+  const tab = document.createElement('button');
+  tab.className = 'date-tab' + (i===0?' active':'');
+  tab.dataset.idx = i;
+  tab.innerHTML = `${d.label} <span class="tab-count">${cnt}</span>`;
+  tab.onclick = ()=>switchTab(i);
+  tabsEl.appendChild(tab);
+});
+
+// Add "전체" tab
+const allTab = document.createElement('button');
+allTab.className = 'date-tab';
+allTab.dataset.idx = 'all';
+allTab.innerHTML = `전체 보기 <span class="tab-count">${totalStudents}</span>`;
+allTab.onclick = ()=>switchTab('all');
+tabsEl.insertBefore(allTab, tabsEl.firstChild);
+
+function switchTab(idx){
+  document.querySelectorAll('.date-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelector(`.date-tab[data-idx="${idx}"]`).classList.add('active');
+  document.querySelectorAll('.date-section').forEach(s=>{
+    if(idx==='all') s.classList.add('active');
+    else{
+      s.classList.toggle('active', s.dataset.idx==idx);
+    }
+  });
+}
+
+// Content
+const contentEl = document.getElementById('content');
+
+allData.forEach((dateData,di)=>{
+  const section = document.createElement('div');
+  section.className = 'date-section'+(di===0?' active':'');
+  section.dataset.idx = di;
+
+  dateData.groups.forEach((group, gi)=>{
+    // Group by flight
+    const flightMap = new Map();
+    group.students.forEach(s=>{
+      const key = `${s.f}|${s.d}|${s.t}`;
+      if(!flightMap.has(key)) flightMap.set(key,[]);
+      flightMap.get(key).push(s);
+    });
+
+    const groupEl = document.createElement('div');
+    groupEl.className = 'pickup-group' + (group.students.length <= 3 ? ' open' : '');
+    groupEl.innerHTML = `
+      <div class="pickup-header" onclick="this.parentElement.classList.toggle('open')">
+        <div class="pickup-left">
+          <div class="pickup-time">${group.pickup}</div>
+          <div class="pickup-meta">
+            <div class="pickup-label">LCIC 픽업</div>
+            <div class="pickup-date-note">${group.pickupDate}${group.note?' · '+group.note:''}</div>
+          </div>
+        </div>
+        <div class="pickup-right">
+          <div class="pickup-count">${group.students.length}명</div>
+          <div class="pickup-arrow">▼</div>
+        </div>
+      </div>
+      <div class="student-list">
+        <div class="student-list-inner">
+          ${Array.from(flightMap.entries()).map(([key, students])=>{
+            const [flight,dep,terminal] = key.split('|');
+            const termClass = terminal==='T1'?'t1':'';
+            let num = 0;
+            return `
+              <div class="flight-group-label">
+                <span class="flight-badge">${flight}</span>
+                <span class="dep-time-badge">✈ ${dep}</span>
+                <span class="terminal-badge ${termClass}">${terminal}</span>
+              </div>
+              ${students.map(s=>{
+                num++;
+                return `
+                <div class="student-row" data-search="${s.n} ${s.e} ${s.f}">
+                  <span class="student-num">${num}</span>
+                  <span class="gender-dot ${s.g.toLowerCase()}"></span>
+                  <span class="student-name">${s.n}</span>
+                  <span class="student-eng">${s.e}</span>
+                </div>`;
+              }).join('')}
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+    section.appendChild(groupEl);
+  });
+
+  contentEl.appendChild(section);
+});
+
+// ─── SEARCH ───
+const searchInput = document.getElementById('searchInput');
+let searchTimeout;
+searchInput.addEventListener('input', ()=>{
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(doSearch, 150);
+});
+
+function doSearch(){
+  const q = searchInput.value.trim().toLowerCase();
+  
+  if(!q){
+    // Reset: show all, respect tab
+    document.querySelectorAll('.pickup-group').forEach(g=>g.style.display='');
+    document.querySelectorAll('.student-row').forEach(r=>r.style.display='');
+    document.querySelectorAll('.flight-group-label').forEach(l=>l.style.display='');
+    const activeTab = document.querySelector('.date-tab.active');
+    if(activeTab) switchTab(activeTab.dataset.idx);
+    removeNoResults();
+    return;
+  }
+
+  // Show all sections for search
+  document.querySelectorAll('.date-section').forEach(s=>s.classList.add('active'));
+  
+  let totalFound = 0;
+  
+  document.querySelectorAll('.pickup-group').forEach(group=>{
+    let groupFound = 0;
+    group.querySelectorAll('.student-row').forEach(row=>{
+      const text = row.dataset.search.toLowerCase();
+      const match = text.includes(q);
+      row.style.display = match ? '' : 'none';
+      if(match) groupFound++;
+    });
+    
+    // Show flight labels only if they have visible students after them
+    group.querySelectorAll('.flight-group-label').forEach(label=>{
+      let next = label.nextElementSibling;
+      let hasVisible = false;
+      while(next && !next.classList.contains('flight-group-label')){
+        if(next.classList.contains('student-row') && next.style.display !== 'none') hasVisible = true;
+        next = next.nextElementSibling;
+      }
+      label.style.display = hasVisible ? '' : 'none';
+    });
+    
+    group.style.display = groupFound > 0 ? '' : 'none';
+    if(groupFound > 0) group.classList.add('open');
+    totalFound += groupFound;
+  });
+
+  if(totalFound === 0) showNoResults();
+  else removeNoResults();
+}
+
+function showNoResults(){
+  removeNoResults();
+  const el = document.createElement('div');
+  el.className = 'no-results';
+  el.id = 'noResults';
+  el.innerHTML = '<div class="no-results-icon">🔍</div>검색 결과가 없습니다';
+  contentEl.appendChild(el);
+}
+function removeNoResults(){
+  const el = document.getElementById('noResults');
+  if(el) el.remove();
+}
+</script>
+</body>
+</html>
