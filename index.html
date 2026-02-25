@@ -38,18 +38,34 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 
-/* ── Animated BG ── */
+/* ── Campus BG ── */
+.bg-campus{
+  position:fixed;inset:0;z-index:0;
+  background:url('./assets/campus-night.jpg') center center / cover no-repeat;
+  filter:brightness(0.3) saturate(0.7);
+}
+.bg-overlay{
+  position:fixed;inset:0;z-index:0;
+  background:
+    linear-gradient(180deg, 
+      rgba(6,8,15,0.92) 0%, 
+      rgba(6,8,15,0.78) 30%, 
+      rgba(6,8,15,0.85) 60%, 
+      rgba(6,8,15,0.95) 100%
+    );
+  pointer-events:none;
+}
 .bg-glow{
   position:fixed;inset:0;pointer-events:none;z-index:0;
   background:
-    radial-gradient(ellipse 600px 400px at 20% 10%, #58a6ff08, transparent),
-    radial-gradient(ellipse 500px 500px at 80% 80%, #f0b42906, transparent);
+    radial-gradient(ellipse 600px 400px at 20% 10%, #58a6ff06, transparent),
+    radial-gradient(ellipse 500px 500px at 80% 80%, #f0b42904, transparent);
 }
 
 /* ── Header ── */
 .header{
   position:sticky;top:0;z-index:100;
-  background:var(--bg);
+  background:rgba(6,8,15,0.85);
   border-bottom:1px solid var(--border);
   backdrop-filter:blur(20px);
   -webkit-backdrop-filter:blur(20px);
@@ -82,9 +98,11 @@ body{
 
 /* ── Notice Banner ── */
 .notice-bar{
-  background:linear-gradient(135deg,#1a1207,#15120a);
+  background:linear-gradient(135deg,rgba(26,18,7,0.9),rgba(21,18,10,0.9));
   border-bottom:1px solid #f0b42925;
   overflow:hidden;
+  position:relative;z-index:1;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
 }
 .notice-inner{
   max-width:1100px;margin:0 auto;padding:16px 20px;
@@ -123,9 +141,10 @@ body{
 }
 .stat-chip{
   font-size:12px;padding:6px 12px;border-radius:20px;
-  background:var(--card);border:1px solid var(--border);
+  background:rgba(22,27,34,0.8);border:1px solid var(--border);
   color:var(--text-dim);font-weight:500;
   display:flex;align-items:center;gap:5px;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
 }
 .stat-chip .num{color:var(--text);font-weight:700;font-family:'Space Mono',monospace;}
 
@@ -135,10 +154,11 @@ body{
 }
 .search-input{
   width:100%;padding:12px 16px 12px 40px;
-  background:var(--card);border:1px solid var(--border);
+  background:rgba(22,27,34,0.8);border:1px solid var(--border);
   border-radius:var(--radius);color:var(--text);
   font-size:14px;font-family:inherit;
   transition:all .2s;outline:none;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
 }
 .search-input::placeholder{color:var(--text-muted);}
 .search-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);}
@@ -156,10 +176,11 @@ body{
 .date-tabs::-webkit-scrollbar{display:none;}
 .date-tab{
   flex-shrink:0;padding:8px 16px;border-radius:var(--radius-sm);
-  background:var(--card);border:1px solid var(--border);
+  background:rgba(22,27,34,0.8);border:1px solid var(--border);
   color:var(--text-dim);font-size:13px;font-weight:600;
   cursor:pointer;transition:all .2s;white-space:nowrap;
   display:flex;align-items:center;gap:6px;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
 }
 .date-tab:hover{background:var(--card-hover);color:var(--text);}
 .date-tab.active{
@@ -176,7 +197,9 @@ body{
 .date-section.active{display:block;}
 
 .pickup-group{
-  background:var(--card);
+  background:rgba(22,27,34,0.85);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
   border:1px solid var(--border);
   border-radius:var(--radius);
   margin-bottom:12px;
@@ -294,6 +317,7 @@ body{
   color:var(--text-muted);font-size:11px;
   border-top:1px solid var(--border);
   letter-spacing:0.3px;
+  position:relative;z-index:1;
 }
 
 /* ── E-ticket Button ── */
@@ -394,67 +418,9 @@ body{
   .stat-chip{font-size:11px;padding:5px 10px;}
 }
 
-/* ── E-ticket Example ── */
-.eticket-btn{
-  display:inline-flex;align-items:center;gap:6px;
-  margin-top:10px;padding:8px 14px;
-  background:#58a6ff15;border:1px dashed #58a6ff40;
-  border-radius:var(--radius-sm);cursor:pointer;
-  color:var(--accent);font-size:12px;font-weight:600;
-  transition:all .2s;
-}
-.eticket-btn:hover{background:#58a6ff25;border-color:var(--accent);}
-.eticket-btn .btn-icon{font-size:16px;}
-
-/* ── Modal ── */
-.modal-overlay{
-  position:fixed;inset:0;z-index:9999;
-  background:rgba(0,0,0,.85);
-  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-  display:none;align-items:center;justify-content:center;
-  padding:20px;
-  opacity:0;transition:opacity .3s;
-}
-.modal-overlay.show{display:flex;opacity:1;}
-.modal-content{
-  position:relative;
-  max-width:520px;width:100%;
-  background:var(--card);border:1px solid var(--border);
-  border-radius:var(--radius);overflow:hidden;
-  animation:modalIn .3s ease;
-}
-@keyframes modalIn{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
-.modal-header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:14px 16px;border-bottom:1px solid var(--border);
-}
-.modal-title{font-size:14px;font-weight:700;color:var(--text);}
-.modal-subtitle{font-size:11px;color:var(--text-dim);margin-top:2px;}
-.modal-close{
-  width:32px;height:32px;border-radius:8px;
-  background:transparent;border:none;cursor:pointer;
-  color:var(--text-dim);font-size:18px;
-  display:flex;align-items:center;justify-content:center;
-  transition:all .2s;
-}
-.modal-close:hover{background:var(--card-hover);color:var(--text);}
-.modal-body{padding:16px;text-align:center;}
-.modal-body img{
-  width:100%;border-radius:var(--radius-sm);
-  border:1px solid var(--border);
-}
-.modal-note{
-  margin-top:12px;padding:10px 14px;
-  background:#f8514910;border:1px solid #f8514925;
-  border-radius:var(--radius-xs);
-  font-size:12px;color:#e6edf3cc;text-align:left;
-  line-height:1.6;
-}
-.modal-note strong{color:var(--red);}
-
 /* ── Print ── */
 @media print{
-  .header,.notice-bar,.search-wrap,.date-tabs,.stats-bar,.footer,.bg-glow{display:none!important}
+  .header,.notice-bar,.search-wrap,.date-tabs,.stats-bar,.footer,.bg-glow,.bg-campus,.bg-overlay{display:none!important}
   body{background:#fff;color:#000;}
   .main{max-width:100%;padding:0;}
   .date-section{display:block!important;}
@@ -469,6 +435,8 @@ body{
 </head>
 <body>
 
+<div class="bg-campus"></div>
+<div class="bg-overlay"></div>
 <div class="bg-glow"></div>
 
 <!-- Header -->
@@ -502,16 +470,8 @@ body{
       </div>
       <div class="notice-item">
         <div class="notice-icon info">✓</div>
-        <div><strong>체크아웃</strong> — 출발 시간 전까지 체크아웃을 완료해 주세요.</div>
+        <div><strong>체크아웃 & 로비 집합</strong> — 체크인 때 받았던 물품 잘 챙겨서 체크아웃 완료 후, 픽업 시간 <strong>10분 전</strong>까지 기숙사 로비에서 대기해 주세요.</div>
       </div>
-      <div class="notice-item">
-        <div class="notice-icon info">✓</div>
-        <div><strong>로비 집합</strong> — LCIC 픽업 시간 <strong>10분 전</strong>까지 기숙사 로비에서 대기해 주세요.</div>
-      </div>
-    </div>
-    <div class="eticket-btn" onclick="openModal()">
-      <span class="btn-icon">🎫</span>
-      E-Ticket 예시 보기 — 이렇게 생긴 걸 꼭 저장하세요!
     </div>
   </div>
 </div>
